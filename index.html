@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>äether 729</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="air.png">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300&family=Meie+Script&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fdfdfd; --text-color: #1a1a1a; --accent-color: #999;
+            --lunar-pulse: #bf00ff;
+            --spring-title: #ffb7c5; --spring-date: #7cfc00; --spring-desc: #ccccff; --lupercalia-red: #ff6b6b;
+            --summer-title: #ff8c00; --summer-date: #ff00ff; --summer-desc: #ff8a75; 
+            --autumn-title: #daa520; --autumn-date: #ffee00; --autumn-desc: #a67b5b;  
+            --winter-title: #000080; --winter-date: #afeeee; --winter-desc: #a9a970;  
+            --phis-bg: #000000; --phis-text: #ffffff;
+        }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-color);
+            font-family: 'Inter', sans-serif; margin: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; text-transform: lowercase; transition: background-color 0.8s ease, color 0.8s ease;
+            user-select: none; overflow: hidden;
+        }
+
+        /* PHÏS STATE OVERRIDES */
+        body.season-phis { background-color: var(--phis-bg) !important; color: var(--phis-text) !important; }
+        body.season-phis header { border-bottom-color: var(--phis-text) !important; }
+        body.season-phis #sub-header, 
+        body.season-phis #clock-small, 
+        body.season-phis #chaos-toggle { color: var(--phis-text) !important; opacity: 1 !important; }
+        body.season-phis .day { color: var(--phis-text) !important; }
+        body.season-phis #status-header { color: var(--phis-text) !important; opacity: 0.6; }
+
+        #container { text-align: center; width: 95%; max-width: 450px; }
+        
+        #transition-header {
+            font-size: 0.62rem; font-weight: 800; letter-spacing: 0.45em;
+            color: var(--lunar-pulse); height: 1.2rem; text-transform: uppercase; margin-bottom: 0.2rem;
+        }
+        .heartbeat { animation: pulse 3s ease-in-out infinite; }
+        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+
+        #status-header { 
+            font-size: 0.72rem; font-weight: 300; letter-spacing: 0.15em; 
+            color: var(--accent-color); margin-bottom: 0.8rem; opacity: 0.8; 
+        }
+
+        header { 
+            font-family: 'Playfair Display', serif; font-size: 1.8rem; letter-spacing: 0.1em; 
+            border-bottom: 1px solid #1a1a1a; padding-bottom: 0.5rem; margin-bottom: 0.2rem; 
+            display: flex; justify-content: center; align-items: center; gap: 20px; 
+        }
+        .nav-btn { font-weight: 300; opacity: 0.2; cursor: pointer; padding: 0 10px; }
+        
+        #sub-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.72rem; 
+            color: var(--accent-color); margin-bottom: 2rem; padding: 0 5px; 
+        }
+        #chaos-toggle { font-family: 'Meie Script', cursive; font-size: 1rem; cursor: pointer; transition: all 0.4s ease; }
+
+        .lunar-phase { 
+            text-decoration: underline; text-underline-offset: 4px; 
+            text-decoration-color: var(--accent-color); transition: text-decoration-color 0.5s ease; 
+        }
+        body.chaos-mode .lunar-phase { text-decoration-color: var(--lunar-pulse); opacity: 1 !important; }
+
+        #calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 15px; margin: 1.5rem 0; font-family: 'Playfair Display', serif; }
+        
+        .day { 
+            font-size: 1.2rem; opacity: 0.15; transition: all 0.3s ease; color: inherit; 
+            position: relative; display: flex; flex-direction: column; align-items: center; 
+        }
+
+        /* TODAY MARKER: THE INTERPUNCT (DOT) */
+        .day.today { opacity: 1; font-weight: bold; }
+        .day.today::before {
+            content: '·'; position: absolute; top: -14px; font-size: 1.5rem; line-height: 0; color: inherit;
+        }
+
+        /* CHAOS OVERRIDES */
+        #vibe-description, #holiday-subtext { transition: all 0.5s ease; }
+
+        body.chaos-mode.season-spring #season-title { color: var(--spring-title); }
+        body.chaos-mode.season-spring #vibe-description, 
+        body.chaos-mode.season-spring #holiday-subtext { color: var(--spring-desc) !important; opacity: 1 !important; }
+        body.chaos-mode.season-spring .holiday-date { color: var(--spring-date) !important; opacity: 1 !important; }
+        body.chaos-mode.season-spring .lupercalia { color: var(--lupercalia-red) !important; opacity: 1 !important; }
+
+        body.chaos-mode.season-summer #season-title { color: var(--summer-title); }
+        body.chaos-mode.season-summer #vibe-description, 
+        body.chaos-mode.season-summer #holiday-subtext { color: var(--summer-desc) !important; opacity: 1 !important; }
+        body.chaos-mode.season-summer .holiday-date { color: var(--summer-date) !important; opacity: 1 !important; }
+
+        body.chaos-mode.season-autumn #season-title { color: var(--autumn-title); }
+        body.chaos-mode.season-autumn #vibe-description, 
+        body.chaos-mode.season-autumn #holiday-subtext { color: var(--autumn-desc) !important; opacity: 1 !important; }
+        body.chaos-mode.season-autumn .holiday-date { color: var(--autumn-date) !important; opacity: 1 !important; }
+
+        body.chaos-mode.season-winter #season-title { color: var(--winter-title); }
+        body.chaos-mode.season-winter #vibe-description, 
+        body.chaos-mode.season-winter #holiday-subtext { color: var(--winter-desc) !important; opacity: 1 !important; }
+        body.chaos-mode.season-winter .holiday-date { color: var(--winter-date) !important; opacity: 1 !important; }
+
+        #vibe-description { font-size: 0.8rem; letter-spacing: 0.2em; color: var(--accent-color); }
+        #holiday-subtext { 
+            margin-top: 1.8rem; font-size: 0.75rem; letter-spacing: 0.12em; opacity: 0.6; 
+            font-family: 'Playfair Display', serif; font-style: italic; min-height: 1.2em; color: var(--accent-color);
+        }
+        #year-footer { position: fixed; bottom: 2rem; font-size: 0.8rem; letter-spacing: 0.4em; opacity: 0.4; cursor: pointer; }
+    </style>
+</head>
+<body id="main-body" class="season-spring">
+
+    <div id="container">
+        <div id="transition-header"></div>
+        <div id="status-header">calibrating...</div>
+        
+        <header>
+            <span class="nav-btn" onclick="changeMonth(-1)">&lt;</span>
+            <span id="season-title">season</span>
+            <span class="nav-btn" onclick="changeMonth(1)">&gt;</span>
+        </header>
+        
+        <div id="sub-header">
+            <span id="zodiac-text">loading...</span>
+            <div id="chaos-controls">
+                <span id="chaos-toggle" onclick="toggleChaos()">chaos:off</span>
+                <span id="clock-small" style="margin-left:12px; opacity:0.4; font-size:0.78rem;">00:00</span>
+            </div>
+        </div>
+
+        <div id="calendar-grid"></div>
+        <div id="vibe-description">vibration</div>
+        <div id="holiday-subtext"></div>
+    </div>
+
+    <div id="year-footer" onclick="resetToToday()">729</div>
+
+    <script>
+        const AETHER_DATA = {
+            months: [
+                { id: 0, season: "spring", name: "spring: i", vibe: "the stirring", trad: "feb", zodiac: "aquarius/pisces", holiday: "first day of spring (01) | lupercalia (14-16)", holidayDates: [1], lupercaliaDates: [14, 15, 16] },
+                { id: 1, season: "spring", name: "spring: ii", vibe: "the birth", trad: "mar", zodiac: "pisces/aries", holiday: "spring equinox (19-20)", holidayDates: [19, 20] },
+                { id: 2, season: "spring", name: "spring: iii", vibe: "the bloom", trad: "apr", zodiac: "aries/taurus", holiday: "easter (05)", holidayDates: [5] },
+                { id: 3, season: "summer", name: "summer: i", vibe: "the zenith", trad: "may", zodiac: "taurus/gemini", holiday: "first day of summer (01)", holidayDates: [1] },
+                { id: 4, season: "summer", name: "summer: ii", vibe: "the fire", trad: "jun", zodiac: "gemini/cancer", holiday: "summer solstice (21)", holidayDates: [21] },
+                { id: 5, season: "summer", name: "summer: iii", vibe: "the ripeness", trad: "jul", zodiac: "cancer/leo", holiday: "", holidayDates: [] },
+                { id: 6, season: "autumn", name: "autumn: i", vibe: "the harvest", trad: "aug", zodiac: "leo/virgo", holiday: "first day of autumn (01)", holidayDates: [1] },
+                { id: 7, season: "autumn", name: "autumn: ii", vibe: "the decay", trad: "sep", zodiac: "virgo/libra", holiday: "autumn equinox (21)", holidayDates: [21] },
+                { id: 8, season: "autumn", name: "autumn: iii", vibe: "the slumber", trad: "oct", zodiac: "libra/scorpio", holiday: "hallo's eve (27) | halloween (28)", holidayDates: [27, 28] },
+                { id: 9, season: "winter", name: "winter: i", vibe: "the frost", trad: "nov", zodiac: "scorpio/sagittarius", holiday: "first day of winter (01) | harvest day (20)", holidayDates: [1, 20] },
+                { id: 10, season: "winter", name: "winter: ii", vibe: "the long night", trad: "dec", zodiac: "sagittarius/capricorn", holiday: "winter solstice (21)", holidayDates: [21] },
+                { id: 11, season: "winter", name: "winter: iii", vibe: "the ash", trad: "jan", zodiac: "capricorn/aquarius", holiday: "", holidayDates: [] },
+                { id: 12, season: "phis", name: "phïs", vibe: "äon", trad: "void", zodiac: "null", holiday: "start of äon (01) | end of äon (28)", holidayDates: [1, 28] }
+            ]
+        };
+
+        function updateYear() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth(); 
+            let phantomYear = currentYear - 1297;
+            if (currentMonth === 0) phantomYear -= 1; // Year stays old until Feb 1st
+            document.getElementById('year-footer').textContent = phantomYear;
+        }
+
+        let now = new Date();
+        let currentViewMonth = now.getMonth() === 1 ? 0 : (now.getMonth() - 1 + 12) % 12;
+
+        function getMoonPhase() {
+            const lp = 2551443; const new_moon = new Date(1970, 0, 7, 20, 35, 0);
+            const phase = ((new Date().getTime() - new_moon.getTime()) / 1000) % lp;
+            const res = Math.floor(phase / (24 * 3600)) + 1;
+            const icons = ["●", "☽", "p", "🌔", "○", "🌖", "d", "☾"];
+            const names = ["new moon", "waxing crescent", "first quarter", "waxing gibbous", "full moon", "waning gibbous", "last quarter", "waning crescent"];
+            let idx = (res <= 1) ? 0 : (res <= 6) ? 1 : (res <= 8) ? 2 : (res <= 13) ? 3 : (res <= 15) ? 4 : (res <= 20) ? 5 : (res <= 22) ? 6 : 7;
+            return { name: names[idx], icon: icons[idx] };
+        }
+
+        async function fetchAtmo() {
+            const moon = getMoonPhase();
+            try {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&current_weather=true&temperature_unit=fahrenheit`);
+                    const data = await res.json();
+                    document.getElementById('status-header').innerHTML = `${Math.round(data.current_weather.temperature)}°f // ethereal — ${moon.icon} ${moon.name}`;
+                }, () => { document.getElementById('status-header').innerHTML = `atmosphere // unknown — ${moon.icon} ${moon.name}`; });
+            } catch (e) { document.getElementById('status-header').innerHTML = `atmosphere // unknown — ${moon.icon} ${moon.name}`; }
+        }
+
+        function toggleChaos() {
+            document.body.classList.toggle('chaos-mode');
+            document.getElementById('chaos-toggle').textContent = document.body.classList.contains('chaos-mode') ? "chaos:on" : "chaos:off";
+            renderAether();
+        }
+
+        function changeMonth(dir) { currentViewMonth = (currentViewMonth + dir + AETHER_DATA.months.length) % AETHER_DATA.months.length; renderAether(); }
+        function resetToToday() { let d = new Date(); currentViewMonth = d.getMonth() === 1 ? 0 : (d.getMonth() - 1 + 12) % 12; renderAether(); }
+
+        function renderAether() {
+            const dObj = new Date();
+            const realDay = dObj.getDate();
+            const realMonth = dObj.getMonth() === 1 ? 0 : (dObj.getMonth() - 1 + 12) % 12;
+            const m = AETHER_DATA.months[currentViewMonth];
+            
+            document.body.className = `season-${m.season}${document.body.classList.contains('chaos-mode') ? ' chaos-mode' : ''}`;
+            document.getElementById('season-title').textContent = m.name;
+            document.getElementById('zodiac-text').textContent = `${m.zodiac} (${m.trad})`;
+            document.getElementById('vibe-description').textContent = m.vibe;
+            document.getElementById('holiday-subtext').innerHTML = m.holiday;
+
+            const transHeader = document.getElementById('transition-header');
+            if (realDay > 28 && currentViewMonth === realMonth) {
+                transHeader.textContent = "phïs day transition";
+                transHeader.classList.add('heartbeat');
+            } else {
+                transHeader.textContent = "";
+                transHeader.classList.remove('heartbeat');
+            }
+
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 28; i++) {
+                const d = document.createElement('div');
+                d.className = 'day';
+                if ([1, 7, 14, 21].includes(i)) d.classList.add('lunar-phase');
+                if (m.holidayDates && m.holidayDates.includes(i)) d.classList.add('holiday-date');
+                if (m.lupercaliaDates && m.lupercaliaDates.includes(i)) d.classList.add('lupercalia');
+                if (currentViewMonth === realMonth) {
+                    if (i === realDay) d.classList.add('today');
+                    if (realDay > 28 && i === 28) d.classList.add('today');
+                }
+                d.textContent = String(i).padStart(2, '0');
+                grid.appendChild(d);
+            }
+        }
+
+        renderAether(); fetchAtmo(); updateYear();
+        setInterval(() => {
+            const n = new Date(); const clk = document.getElementById('clock-small');
+            if(clk) clk.textContent = n.getHours().toString().padStart(2,'0') + ":" + n.getMinutes().toString().padStart(2,'0');
+        }, 30000);
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+    </script>
+</body>
+  </html>
+              
